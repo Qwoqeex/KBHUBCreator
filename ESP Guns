@@ -1,0 +1,1427 @@
+       --[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Main") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "Хомми-Дурка"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "Hommie-Durka" and drop:FindFirstChild("Main") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "Hommie-Durka" and drop:FindFirstChild("Main") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F key
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Main") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "MP5"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "MP5" and drop:FindFirstChild("Main") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "MP5" and drop:FindFirstChild("Main") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Main") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "Rezingtan 15"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "Rezingtan 15" and drop:FindFirstChild("Main") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "Rezingtan 15" and drop:FindFirstChild("Main") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Main") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "Дизерт Игл"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "Дизерт Игл" and drop:FindFirstChild("Main") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "Дизерт Игл" and drop:FindFirstChild("Main") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Main") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "М-Маркелоф"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "М-Маркелоф" and drop:FindFirstChild("Main") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "М-Маркелоф" and drop:FindFirstChild("Main") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Main") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "Макаров"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "Макаров" and drop:FindFirstChild("Main") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "Макаров" and drop:FindFirstChild("Main") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Main") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "ОРДОВИК"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "ОРДОВИК" and drop:FindFirstChild("Main") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "ОРДОВИК" and drop:FindFirstChild("Main") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Main") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "Обрез"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "Обрез" and drop:FindFirstChild("Main") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "Обрез" and drop:FindFirstChild("Main") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Main") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "Пистолет Искры"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "Пистолет Искры" and drop:FindFirstChild("Main") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "Пистолет Искры" and drop:FindFirstChild("Main") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Body")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Body") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "У-ВСУ"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "У-ВСУ" and drop:FindFirstChild("Body") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "У-ВСУ" and drop:FindFirstChild("Body") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Main") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = "AK-25"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == "AK-25" and drop:FindFirstChild("Main") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == "AK-25" and drop:FindFirstChild("Main") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
+
+--[[
+    This script enables/disables an ESP (Extra Sensory Perception) effect for objects named "Hommie-Durka"
+    with a child "Main". Press the "F" key to toggle the ESP on and off.
+    
+    Note:
+    - This is a LocalScript designed for Roblox exploiting the Drawing API.
+    - The script uses RenderStepped for updating the ESP positions.
+--]]
+
+local camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Flag to track whether ESP is active or not
+local espEnabled = true
+
+-- Table to store active ESP instances by drop instance
+local activeESP = {}
+
+-- Function to start ESP for a given drop
+local function startESP(drop)
+    -- Ensure drop is valid and not already processed
+    if not drop or activeESP[drop] then return end
+
+    -- Verify the drop has required child "Main"
+    local mainPart = drop:FindFirstChild("Main")
+    if not mainPart then return end
+
+    -- Create and configure the Drawing for ESP text
+    local dropESP = Drawing.new("Text")
+    dropESP.Visible = false
+    dropESP.Center = true
+    dropESP.Outline = true
+    dropESP.Font = 2
+    dropESP.Color = Color3.fromRGB(255, 255, 255)
+    dropESP.Size = 13
+
+    -- Connect to RenderStepped to update the ESP each frame
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        -- If the drop is still valid and has its "Main" part
+        if drop and drop.Parent and drop:FindFirstChild("Handle") then
+            local part = drop.Main
+            local screenPoint, onscreen = camera:WorldToViewportPoint(part.Position)
+            
+            if onscreen then
+                dropESP.Position = Vector2.new(screenPoint.X, screenPoint.Y)
+                dropESP.Text = ".21 Револьвер"
+                dropESP.Visible = true
+            else
+                dropESP.Visible = false
+            end
+        else
+            -- Cleanup when the drop is removed or lost its main
+            dropESP.Visible = false
+            dropESP:Remove()
+            if connection then
+                connection:Disconnect()
+            end
+            activeESP[drop] = nil
+        end
+    end)
+
+    -- Store the connection and drawing in activeESP table
+    activeESP[drop] = {
+        connection = connection,
+        drawing = dropESP,
+    }
+end
+
+-- Function to stop ESP for all active drops
+local function stopAllESP()
+    for drop, espData in pairs(activeESP) do
+        if espData.connection then
+            espData.connection:Disconnect()
+        end
+        if espData.drawing then
+            espData.drawing:Remove()
+        end
+        activeESP[drop] = nil
+    end
+end
+
+-- Function to initialize ESP for all applicable drops in the workspace
+local function initializeESP()
+    for _, drop in ipairs(workspace:GetChildren()) do
+        if drop.Name == ".21 Револьвер" and drop:FindFirstChild("Handle") then
+            startESP(drop)
+        end
+    end
+end
+
+-- Listen for new drops being added to the workspace
+workspace.ChildAdded:Connect(function(drop)
+    if espEnabled and drop.Name == ".21 Револвьер" and drop:FindFirstChild("Handle") then
+        startESP(drop)
+    end
+end)
+
+-- Toggle the ESP on and off with the F keyvv
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.V then
+        espEnabled = not espEnabled
+        if espEnabled then
+            initializeESP()
+        else
+            stopAllESP()
+        end
+    end
+end)
+
+-- Initialize ESP on script start if enabled
+if espEnabled then
+    initializeESP()
+end
+
+---------------------------------------------------------------------
