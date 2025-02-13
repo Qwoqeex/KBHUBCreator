@@ -1,0 +1,117 @@
+-- TP Walk Script for Roblox with Toggle Feature
+-- This script manually teleports the player’s character to simulate walking.
+-- It can be toggled on or off by changing the SCRIPT_ENABLED variable.
+-- Place this LocalScript in StarterPlayer -> StarterPlayerScripts.
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Configuration
+local SCRIPT_ENABLED = (Two) -- Change to "off" to disable the script
+local WALK_SPEED = (Two) -- studs per second, adjust as needed
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Table to store current input direction
+local moveDirection = {
+	W = false,
+	A = false,
+	S = false,
+	D = false
+}
+
+-- Calculate movement vector based on current inputs
+local function getInputVector()
+	local vector = Vector3.new(0, 0, 0)
+	if moveDirection.W then
+		vector = vector + Vector3.new(0, 0, -1)
+	end
+	if moveDirection.S then
+		vector = vector + Vector3.new(0, 0, 1)
+	end
+	if moveDirection.A then
+		vector = vector + Vector3.new(-1, 0, 0)
+	end
+	if moveDirection.D then
+		vector = vector + Vector3.new(1, 0, 0)
+	end
+	-- Return the normalized vector or a zero vector if magnitude is 0
+	return (vector.Magnitude > 0) and vector.Unit or Vector3.new(0, 0, 0)
+end
+
+-- Update input table on key press
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+	if gameProcessedEvent then return end
+	local key = input.KeyCode
+	
+	if key == Enum.KeyCode.W then
+		moveDirection.W = true
+	elseif key == Enum.KeyCode.A then
+		moveDirection.A = true
+	elseif key == Enum.KeyCode.S then
+		moveDirection.S = true
+	elseif key == Enum.KeyCode.D then
+		moveDirection.D = true
+	end
+end)
+
+-- Update input table on key release
+UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
+	if gameProcessedEvent then return end
+	local key = input.KeyCode
+	
+	if key == Enum.KeyCode.W then
+		moveDirection.W = false
+	elseif key == Enum.KeyCode.A then
+		moveDirection.A = false
+	elseif key == Enum.KeyCode.S then
+		moveDirection.S = false
+	elseif key == Enum.KeyCode.D then
+		moveDirection.D = false
+	end
+end)
+
+-- Main loop: teleport the character based on input each frame if the script is enabled
+RunService.Heartbeat:Connect(function(deltaTime)
+	-- Check if the script is enabled; if not, skip processing.
+	if SCRIPT_ENABLED:lower() ~= "on" then
+		return
+	end
+	
+	-- Verify that the character and its HumanoidRootPart exist
+	if not (character and humanoidRootPart) then
+		return
+	end
+
+	-- Get the current input vector relative to the player's local input
+	local inputVector = getInputVector()
+	if inputVector.Magnitude > 0 then
+		-- Obtain the camera's orientation to move relative to the view
+		local camera = workspace.CurrentCamera
+		-- Project the camera's LookVector and RightVector onto the XZ plane
+		local cameraLook = camera.CFrame.LookVector
+		cameraLook = Vector3.new(cameraLook.X, 0, cameraLook.Z).Unit
+		local cameraRight = camera.CFrame.RightVector
+		cameraRight = Vector3.new(cameraRight.X, 0, cameraRight.Z).Unit
+
+		-- Calculate move direction relative to camera orientation
+		local moveVec = (cameraLook * -inputVector.Z + cameraRight * inputVector.X)
+		moveVec = moveVec.Unit
+		
+		-- Calculate the displacement based on moveVec, walk speed, and frame time
+		local displacement = moveVec * WALK_SPEED * deltaTime
+		local newCFrame = humanoidRootPart.CFrame + displacement
+		
+		-- Teleport the character's HumanoidRootPart for smooth movement
+		humanoidRootPart.CFrame = newCFrame
+	end
+end)
+
+-- Listen for character respawn and update references accordingly
+player.CharacterAdded:Connect(function(newChar)
+	character = newChar
+	humanoidRootPart = newChar:WaitForChild("HumanoidRootPart")
+end)
