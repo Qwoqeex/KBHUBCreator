@@ -1,0 +1,64 @@
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+
+-- Global toggle state for highlights. Initially enabled.
+local highlightsEnabled = true
+
+-- Function to update all ESP_Highlight instances in the Workspace to the current toggle state.
+local function updateAllHighlights()
+    for _, descendant in ipairs(Workspace:GetDescendants()) do
+        if descendant:IsA("Highlight") and descendant.Name == "ESP_Highlight" then
+            descendant.Enabled = highlightsEnabled
+        end
+    end
+end
+
+-- Function to create a Highlight inside the given NPC model if it doesn't already exist.
+local function addHighlightToNPC(npc)
+    if not npc:IsA("Model") then
+        return
+    end
+
+    -- Avoid adding a duplicate highlight.
+    if npc:FindFirstChildOfClass("Highlight") then
+        return
+    end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_Highlight"
+    highlight.Adornee = npc  -- The entire model will be highlighted.
+    highlight.Enabled = highlightsEnabled  -- Set initial enabled state based on the toggle.
+    highlight.Parent = npc
+end
+
+-- Function to process an instance and add a highlight if it's a Model named "ENEMY".
+local function processInstance(instance)
+    if instance:IsA("Model") and instance.Name == "Krovosos" then
+        -- Delay to ensure the NPC is fully loaded before attaching the highlight.
+        task.delay(0.1, function()
+            addHighlightToNPC(instance)
+        end)
+    end
+end
+
+-- Process all existing descendants in Workspace.
+for _, instance in ipairs(Workspace:GetDescendants()) do
+    processInstance(instance)
+end
+
+-- Listen for new descendants added to Workspace.
+Workspace.DescendantAdded:Connect(function(descendant)
+    processInstance(descendant)
+end)
+
+-- Listen for key press events to toggle highlights when pressing the "N" key.
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then
+        return
+    end
+
+    if input.KeyCode == Enum.KeyCode.N then
+        highlightsEnabled = not highlightsEnabled  -- Toggle the highlight state.
+        updateAllHighlights()  -- Apply the new state to all existing ESP_Highlight instances.
+    end
+end)
