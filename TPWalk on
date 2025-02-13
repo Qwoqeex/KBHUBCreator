@@ -1,21 +1,18 @@
--- TP Walk Script for Roblox with Toggle Feature
--- This script manually teleports the player’s character to simulate walking.
--- It can be toggled on or off by changing the SCRIPT_ENABLED variable.
--- Place this LocalScript in StarterPlayer -> StarterPlayerScripts.
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 -- Configuration
-local SCRIPT_ENABLED = "on" -- Change to "off" to disable the script
-local WALK_SPEED = (Two) -- studs per second, adjust as needed
+local WALK_SPEED = (Speed) -- studs per second, adjust as needed
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- Table to store current input direction
+-- Boolean to track whether the script is active (toggled by T key)
+local scriptEnabled = true
+
+-- Table to store current input direction (W, A, S, D)
 local moveDirection = {
 	W = false,
 	A = false,
@@ -38,55 +35,62 @@ local function getInputVector()
 	if moveDirection.D then
 		vector = vector + Vector3.new(1, 0, 0)
 	end
-	-- Return the normalized vector or a zero vector if magnitude is 0
+	-- Return the normalized vector or a zero vector if the magnitude is 0
 	return (vector.Magnitude > 0) and vector.Unit or Vector3.new(0, 0, 0)
 end
 
--- Update input table on key press
+-- Listen for key input to toggle the script active state with the T key
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
 	if gameProcessedEvent then return end
-	local key = input.KeyCode
 	
-	if key == Enum.KeyCode.W then
+	-- Toggle script on key T press
+	if input.KeyCode == Enum.KeyCode.T then
+		scriptEnabled = not scriptEnabled
+		-- Optionally print the current state to the output for debugging
+		print("TP Walk Script is now", scriptEnabled and "ENABLED" or "DISABLED")
+		return
+	end
+	
+	-- Update moveDirection table on key press for movement keys
+	if input.KeyCode == Enum.KeyCode.W then
 		moveDirection.W = true
-	elseif key == Enum.KeyCode.A then
+	elseif input.KeyCode == Enum.KeyCode.A then
 		moveDirection.A = true
-	elseif key == Enum.KeyCode.S then
+	elseif input.KeyCode == Enum.KeyCode.S then
 		moveDirection.S = true
-	elseif key == Enum.KeyCode.D then
+	elseif input.KeyCode == Enum.KeyCode.D then
 		moveDirection.D = true
 	end
 end)
 
--- Update input table on key release
+-- Listen for key release to update the moveDirection table for movement keys
 UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
 	if gameProcessedEvent then return end
-	local key = input.KeyCode
 	
-	if key == Enum.KeyCode.W then
+	if input.KeyCode == Enum.KeyCode.W then
 		moveDirection.W = false
-	elseif key == Enum.KeyCode.A then
+	elseif input.KeyCode == Enum.KeyCode.A then
 		moveDirection.A = false
-	elseif key == Enum.KeyCode.S then
+	elseif input.KeyCode == Enum.KeyCode.S then
 		moveDirection.S = false
-	elseif key == Enum.KeyCode.D then
+	elseif input.KeyCode == Enum.KeyCode.D then
 		moveDirection.D = false
 	end
 end)
 
 -- Main loop: teleport the character based on input each frame if the script is enabled
 RunService.Heartbeat:Connect(function(deltaTime)
-	-- Check if the script is enabled; if not, skip processing.
-	if SCRIPT_ENABLED:lower() ~= "on" then
+	-- Process only if the script is enabled
+	if not scriptEnabled then
 		return
 	end
 	
-	-- Verify that the character and its HumanoidRootPart exist
+	-- Ensure character and its HumanoidRootPart exist
 	if not (character and humanoidRootPart) then
 		return
 	end
 
-	-- Get the current input vector relative to the player's local input
+	-- Get the current input vector relative to the player's input
 	local inputVector = getInputVector()
 	if inputVector.Magnitude > 0 then
 		-- Obtain the camera's orientation to move relative to the view
@@ -101,7 +105,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 		local moveVec = (cameraLook * -inputVector.Z + cameraRight * inputVector.X)
 		moveVec = moveVec.Unit
 		
-		-- Calculate the displacement based on moveVec, walk speed, and frame time
+		-- Calculate displacement based on moveVec, walk speed, and frame delta time
 		local displacement = moveVec * WALK_SPEED * deltaTime
 		local newCFrame = humanoidRootPart.CFrame + displacement
 		
