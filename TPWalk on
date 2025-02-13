@@ -3,7 +3,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 -- Configuration
-local WALK_SPEED = Speed -- studs per second, adjust as needed
+local WALK_SPEED = 50 -- studs per second, adjust as needed
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
