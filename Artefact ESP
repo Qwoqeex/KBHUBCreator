@@ -1,0 +1,93 @@
+        -- ESP Toggle Script for Roblox using Text (BillboardGui) instead of Highlight.
+-- This script toggles an ESP effect on MeshParts named 'Артефакт "Плоть"' using the X key.
+-- When enabled, a BillboardGui with a TextLabel is added to these parts to make them visible through walls.
+-- When disabled, any added BillboardGui instances are removed.
+
+-- Services
+local UserInputService = game:GetService("UserInputService")
+
+-- Toggle state for the ESP effect (initially off).
+local espEnabled = false
+
+-- Function to attach a BillboardGui with a TextLabel to the part if it doesn't already have one.
+local function addESPText(part)
+    if part:FindFirstChild("ESPText") then 
+        return 
+    end  -- Avoid duplicate ESP texts.
+    
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESPText"
+    billboard.Adornee = part
+    billboard.AlwaysOnTop = true  -- Ensure the text is visible through walls.
+    billboard.Size = UDim2.new(0, 100, 0, 50)  -- Adjust size as necessary.
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Parent = billboard
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = "Артефакт"  -- Text to display on the part.
+    textLabel.TextColor3 = Color3.new(1, 1, 1)  -- Red text, adjust as desired.
+    textLabel.TextScaled = true
+    
+    billboard.Parent = part  -- Parent the BillboardGui to the part.
+end
+
+-- Function to remove the BillboardGui from the part if it exists.
+local function removeESPText(part)
+    local billboard = part:FindFirstChild("ESPText")
+    if billboard then
+        billboard:Destroy()
+    end
+end
+
+-- Function to process (add ESP text to) existing qualifying parts in the workspace.
+local function processExistingParts()
+    for _, descendant in ipairs(workspace:GetDescendants()) do
+        if descendant:IsA("MeshPart") and descendant.Name == 'Артефакт "Плоть"' then
+            addESPText(descendant)
+        end
+    end
+end
+
+-- Function to remove ESP texts from existing qualifying parts.
+local function removeESPTextsFromExistingParts()
+    for _, descendant in ipairs(workspace:GetDescendants()) do
+        if descendant:IsA("MeshPart") and descendant.Name == 'Артефакт "Плоть"' then
+            removeESPText(descendant)
+        end
+    end
+end
+
+-- Connect to new parts being added to the workspace.
+workspace.DescendantAdded:Connect(function(descendant)
+    if descendant:IsA("MeshPart") and descendant.Name == 'Артефакт "Плоть"' then
+        if espEnabled then
+            addESPText(descendant)
+        end
+    end
+end)
+
+-- Clean up ESP texts if a part is removed.
+workspace.DescendantRemoving:Connect(function(descendant)
+    if descendant:IsA("MeshPart") and descendant.Name == 'Артефакт "Плоть"' then
+        removeESPText(descendant)
+    end
+end)
+
+-- Function to toggle ESP on or off.
+local function toggleESP()
+    espEnabled = not espEnabled
+    if espEnabled then
+        processExistingParts()
+    else
+        removeESPTextsFromExistingParts()
+    end
+end
+
+-- Listen for key press events.
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end  -- Ignore input if processed elsewhere.
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.X then
+        toggleESP()
+    end
+end)
