@@ -1,0 +1,79 @@
+local players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local lplr = players.LocalPlayer
+
+-- Toggle flag: initial state enabled.
+local active = true
+
+-- Connection handles for current character's events
+local heartbeatConnection = nil
+local propChangedConnection = nil
+local humanoidDiedConnection = nil
+
+-- Control variable to prevent recursive changes in CFrame
+local stopFlag = false
+
+-- Stores the last valid CFrame of the character's root part
+local lastCF = nil
+
+-- Disconnects all active connections, if any
+local function disconnectConnections()
+    if heartbeatConnection then
+        heartbeatConnection:Disconnect()
+        heartbeatConnection = nil
+    end
+    if propChangedConnection then
+        propChangedConnection:Disconnect()
+        propChangedConnection = nil
+    end
+    if humanoidDiedConnection then
+        humanoidDiedConnection:Disconnect()
+        humanoidDiedConnection = nil
+    end
+end
+
+-- Starts the functionality for the given character
+local function start(character)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+
+    local rootPart = humanoid.RootPart
+    if not rootPart then return end
+
+    -- Save the initial CFrame
+    lastCF = rootPart.CFrame
+
+    -- Heartbeat connection to continuously update the last valid CFrame
+    heartbeatConnection = RunService.Heartbeat:Connect(function()
+        if stopFlag then return end
+        lastCF = rootPart.CFrame
+    end)
+
+    -- Connection to reset the CFrame when it changes
+    propChangedConnection = rootPart:GetPropertyChangedSignal("CFrame"):Connect(function()
+        stopFlag = true
+        rootPart.CFrame = lastCF
+        RunService.Heartbeat:Wait()
+        stopFlag = false
+    end)
+
+    -- When the humanoid dies, disconnect all events
+    humanoidDiedConnection = humanoid.Died:Connect(function()
+        disconnectConnections()
+    end)
+end
+
+-- Function to initialize the script on the current character if active
+local function initializeCharacter()
+    if not active then return end
+    local character = lplr.Character
+    if not character then return end
+
+    -- Wait until the Humanoid and its RootPart are available
+    repeat RunService.Heartbeat:Wait() until character:FindFirstChildOfClass("Humanoid")
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    repeat RunService.Heartbeat:Wait() until humanoid and humanoid.RootPart
+
+    start(character)
