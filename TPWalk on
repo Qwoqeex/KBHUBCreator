@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 -- Configuration
-local SCRIPT_ENABLED = "on" -- Change to "off" to disable the script
+local SCRIPT_ENABLED = (Two) -- Change to "off" to disable the script
 local WALK_SPEED = (Two) -- studs per second, adjust as needed
 
 local player = Players.LocalPlayer
