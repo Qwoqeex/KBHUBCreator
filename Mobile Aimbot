@@ -1,4 +1,4 @@
-    getgenv().Camlock_Settings = {
+getgenv().Camlock_Settings = {
         Prediction = 0.0,
         AimPart = "Head",
         Key = "e",
