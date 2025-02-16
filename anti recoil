@@ -1,0 +1,96 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local function getCharacter()
+    if player.Character then
+        return player.Character
+    else
+        return player.CharacterAdded:Wait()
+    end
+end
+
+camera.CameraType = Enum.CameraType.Scriptable
+local defaultOffset = Vector3.new(0, 5, -12)
+local distance = defaultOffset.Magnitude  -- 13
+local currentPitch = math.atan2(defaultOffset.Y, math.sqrt(defaultOffset.X^2 + defaultOffset.Z^2))
+local currentYaw = math.pi
+local minPitch = math.rad(-10)
+local maxPitch = math.rad(80)
+local sensitivity = 0.012
+local minDistance = 2.5
+local maxDistance = 100
+local rotationActive = false
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        rotationActive = true
+        UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then
+        rotationActive = false
+        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input, gameProcessedEvent)
+    if rotationActive and input.UserInputType == Enum.UserInputType.MouseMovement then
+        currentYaw = currentYaw - input.Delta.X * sensitivity
+        currentPitch = currentPitch + input.Delta.Y * sensitivity
+        currentPitch = math.clamp(currentPitch, minPitch, maxPitch)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    if input.UserInputType == Enum.UserInputType.MouseWheel then
+        local zoomSpeed = 2.5
+        distance = math.clamp(distance - input.Position.Z * zoomSpeed, minDistance, maxDistance)
+    end
+end)
+
+local function updateCamera()
+    local character = getCharacter()
+    local rootPart = character:FindFirstChild("Head")
+    if rootPart then
+        local targetPos = rootPart.Position
+        local offset = Vector3.new(
+            distance * math.cos(currentPitch) * math.sin(currentYaw),
+            distance * math.sin(currentPitch),
+            distance * math.cos(currentPitch) * math.cos(currentYaw)
+        )
+        
+        local desiredCamPos = targetPos + offset
+
+        local raycastParams = RaycastParams.new()
+        local blacklist = {}
+        for _, pl in ipairs(Players:GetPlayers()) do
+            if pl.Character then
+                table.insert(blacklist, pl.Character)
+            end
+        end
+        raycastParams.FilterDescendantsInstances = blacklist
+        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+        local direction = desiredCamPos - targetPos
+        local raycastResult = workspace:Raycast(targetPos, direction, raycastParams)
+        local camPos = desiredCamPos
+        if raycastResult then
+            local offsetMagnitude = 0.5
+            local hitPosition = raycastResult.Position
+            local directionUnit = direction.Unit
+            camPos = hitPosition - directionUnit * offsetMagnitude
+        end
+
+        camera.CFrame = CFrame.new(camPos, targetPos)
+    end
+end
+
+RunService.RenderStepped:Connect(updateCamera)
