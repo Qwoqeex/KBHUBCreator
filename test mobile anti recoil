@@ -1,0 +1,144 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+-- Function to get or wait for the character
+local function getCharacter()
+    if player.Character then
+        return player.Character
+    else
+        return player.CharacterAdded:Wait()
+    end
+end
+
+-- Set up initial camera properties
+camera.CameraType = Enum.CameraType.Scriptable
+local defaultOffset = Vector3.new(0, 5, -12)
+local distance = defaultOffset.Magnitude  -- 13
+local currentPitch = math.atan2(defaultOffset.Y, math.sqrt(defaultOffset.X^2 + defaultOffset.Z^2))
+local currentYaw = math.pi
+local minPitch = math.rad(-10)
+local maxPitch = math.rad(80)
+local sensitivity = 0.012
+local minDistance = 2.5
+local maxDistance = 100
+
+-- Table to track active touches and previous pinch distance for zooming
+local touches = {}
+local previousPinchDistance = nil
+
+-- TouchStarted event: store the starting position of a touch
+UserInputService.TouchStarted:Connect(function(touch, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    touches[touch.Id] = touch.Position
+    -- Reset pinch distance if a new second touch is added
+    if #({table.unpack((function() 
+        local tmp = {} 
+        for k,_ in pairs(touches) do 
+            table.insert(tmp, k) 
+        end 
+        return tmp 
+    end)())}) >= 2 then
+        previousPinchDistance = nil
+    end
+end)
+
+-- TouchEnded event: remove finished touch and reset pinch distance if needed
+UserInputService.TouchEnded:Connect(function(touch, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    touches[touch.Id] = nil
+    -- If less than two touches remain, clear the previous pinch distance
+    local touchCount = 0
+    for _ in pairs(touches) do
+        touchCount = touchCount + 1
+    end
+    if touchCount < 2 then
+        previousPinchDistance = nil
+    end
+end)
+
+-- TouchMoved event: handle rotation (one finger) and pinch zoom (two fingers)
+UserInputService.TouchMoved:Connect(function(touch, gameProcessedEvent)
+    if gameProcessedEvent then return end
+    local prevPos = touches[touch.Id]
+    if not prevPos then return end  -- Safety check
+
+    local newPos = touch.Position
+    touches[touch.Id] = newPos
+
+    -- Count active touches
+    local activeTouches = {}
+    for id, pos in pairs(touches) do
+        activeTouches[id] = pos
+    end
+    local touchCount = 0
+    for _ in pairs(activeTouches) do
+        touchCount = touchCount + 1
+    end
+
+    if touchCount == 1 then
+        -- Single touch: use movement to rotate the camera
+        local delta = newPos - prevPos
+        currentYaw = currentYaw - delta.X * sensitivity
+        currentPitch = currentPitch + delta.Y * sensitivity
+        currentPitch = math.clamp(currentPitch, minPitch, maxPitch)
+    elseif touchCount >= 2 then
+        -- Multi-touch (2 or more): pinch gesture for zooming.
+        local positions = {}
+        for id, pos in pairs(activeTouches) do
+            table.insert(positions, pos)
+            if #positions == 2 then break end
+        end
+        if #positions == 2 then
+            local currentPinchDistance = (positions[1] - positions[2]).Magnitude
+            if previousPinchDistance then
+                local pinchDelta = currentPinchDistance - previousPinchDistance
+                local zoomSpeed = 2.5
+                distance = math.clamp(distance - pinchDelta * zoomSpeed * 0.01, minDistance, maxDistance)
+            end
+            previousPinchDistance = currentPinchDistance
+        end
+    end
+end)
+
+-- Update the camera's position and orientation each frame
+local function updateCamera()
+    local character = getCharacter()
+    local rootPart = character:FindFirstChild("Head")
+    if rootPart then
+        local targetPos = rootPart.Position
+        local offset = Vector3.new(
+            distance * math.cos(currentPitch) * math.sin(currentYaw),
+            distance * math.sin(currentPitch),
+            distance * math.cos(currentPitch) * math.cos(currentYaw)
+        )
+        local desiredCamPos = targetPos + offset
+
+        local raycastParams = RaycastParams.new()
+        local blacklist = {}
+        for _, pl in ipairs(Players:GetPlayers()) do
+            if pl.Character then
+                table.insert(blacklist, pl.Character)
+            end
+        end
+        raycastParams.FilterDescendantsInstances = blacklist
+        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+        local direction = desiredCamPos - targetPos
+        local raycastResult = workspace:Raycast(targetPos, direction, raycastParams)
+        local camPos = desiredCamPos
+        if raycastResult then
+            local offsetMagnitude = 0.5
+            local hitPosition = raycastResult.Position
+            local directionUnit = direction.Unit
+            camPos = hitPosition - directionUnit * offsetMagnitude
+        end
+
+        camera.CFrame = CFrame.new(camPos, targetPos)
+    end
+end
+
+RunService.RenderStepped:Connect(updateCamera)
