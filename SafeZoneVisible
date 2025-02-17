@@ -1,0 +1,4 @@
+local durkaFolder = game.Workspace:FindFirstChild("дурка")
+local safeZonesFolder = durkaFolder:FindFirstChild("SafeZones")
+local zoneSpawn1 = safeZonesFolder:FindFirstChild("ZoneSpawn1")
+zoneSpawn1.Transparency = 0.5
