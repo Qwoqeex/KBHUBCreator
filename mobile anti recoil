@@ -1,0 +1,85 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+-- Set the camera to Scriptable to prevent automatic movements (such as recoil or shake)
+camera.CameraType = Enum.CameraType.Scriptable
+camera.FieldOfView = 70 -- default FOV; adjust as needed
+
+-- Variables for controlling camera rotation
+-- cameraRotation.x is yaw (horizontal rotation) and cameraRotation.y is pitch (vertical rotation)
+local cameraRotation = Vector2.new(0, 0)
+
+-- Sensitivity multiplier for input; adjust to taste
+local sensitivity = 0.2
+
+-- Variables to handle dragging and track the last input position for both PC (mouse) and mobile (touch)
+local dragging = false
+local lastInputPosition = nil
+
+-- Function to update the camera's CFrame based on the player's head position and the current rotation angles
+local function updateCamera()
+    if not player.Character then return end
+    local head = player.Character:FindFirstChild("Head")
+    if not head then return end
+
+    local headPosition = head.Position
+
+    -- Clamp pitch to avoid excessive up/down rotation (in degrees)
+    cameraRotation = Vector2.new(cameraRotation.x, math.clamp(cameraRotation.y, -80, 80))
+
+    -- Calculate the rotation CFrame using the stored yaw (x) and pitch (y)
+    local rotationCFrame = CFrame.Angles(math.rad(cameraRotation.y), math.rad(cameraRotation.x), 0)
+
+    -- Choose a fixed distance from the head for a third-person view; adjust offsetDistance if needed
+    local offsetDistance = 10
+    local cameraOffset = rotationCFrame:VectorToWorldSpace(Vector3.new(0, 0, offsetDistance))
+    local newCameraPos = headPosition - cameraOffset
+
+    -- Set the camera's CFrame to the new position and orient it to look at the player's head
+    camera.CFrame = CFrame.new(newCameraPos, headPosition)
+end
+
+-- Input event triggered when a dragging action starts (right mouse or touch)
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+
+    if input.UserInputType == Enum.UserInputType.MouseButton2 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        lastInputPosition = input.Position
+    end
+end)
+
+-- Input event that updates camera rotation when dragging (mouse movement or touch dragging)
+UserInputService.InputChanged:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if lastInputPosition then
+            local delta = input.Position - lastInputPosition
+            -- Invert the delta values to correct the reversed camera movement:
+            -- Moving right (positive delta.X) now decreases yaw, and moving up (negative delta.Y) now increases pitch.
+            cameraRotation = Vector2.new(
+                cameraRotation.x - delta.X * sensitivity, -- yaw: subtract to reverse direction
+                cameraRotation.y + delta.Y * sensitivity  -- pitch: add to reverse direction
+            )
+        end
+        lastInputPosition = input.Position
+    end
+end)
+
+-- Input event triggered when dragging stops
+UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+        lastInputPosition = nil
+    end
+end)
+
+-- Update the camera every frame to reflect changes in rotation and maintain its position relative to the head
+RunService.RenderStepped:Connect(function()
+    updateCamera()
+end)
