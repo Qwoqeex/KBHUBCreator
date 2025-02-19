@@ -14,7 +14,7 @@ camera.FieldOfView = 70 -- default FOV; adjust as needed
 local cameraRotation = Vector2.new(0, 0)
 
 -- Sensitivity multiplier for input; adjust to taste
-local sensitivity = 0.2
+local sensitivity = 1
 
 -- Variables to handle dragging and track the last input position for both PC (mouse) and mobile (touch)
 local dragging = false
