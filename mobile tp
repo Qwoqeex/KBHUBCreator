@@ -1,75 +1,63 @@
--- This LocalScript creates a movable GUI button that, when clicked, teleports the player's character upward and then back to the original position.
-
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local localPlayer = Players.LocalPlayer
--- Wait for the Character to load if it hasn't already.
-local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
--- Create a ScreenGui and add it to the Player's PlayerGui
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TPGui"
-screenGui.Parent = localPlayer:WaitForChild("PlayerGui")
-
--- Create a button
-local tpButton = Instance.new("TextButton")
-tpButton.Name = "TPButton"
-tpButton.Size = UDim2.new(0, 100, 0, 50) -- Adjusted size to be small but not too small
-tpButton.Position = UDim2.new(0.05, 0, 0.05, 0) -- Initial position near the top-left corner
-tpButton.BackgroundColor3 = Color3.new(0, 0, 0) -- Black background
-tpButton.TextColor3 = Color3.new(1, 1, 1) -- White text
-tpButton.Text = "TP"
-tpButton.Parent = screenGui
-tpButton.Active = true
-tpButton.Selectable = true
-
--- Function to teleport the player's character up and then back down
-local function teleportPlayerUp()
-    local currentPosition = humanoidRootPart.Position
-    -- Teleport up by 100 units on the Y-axis
-    character:MoveTo(currentPosition + Vector3.new(0, 100, 0))
-    wait(0.17)  -- Brief delay before teleporting back
-    character:MoveTo(currentPosition)
+local player = Players.LocalPlayer
+if not player then
+    error("LocalPlayer not found.")
 end
 
--- Connect the teleport function to the button click
-tpButton.MouseButton1Click:Connect(function()
-    -- Ensure the player's character and HumanoidRootPart are still valid
-    character = localPlayer.Character
-    if character then
-        humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        if humanoidRootPart then
-            teleportPlayerUp()
-        else
-            warn("HumanoidRootPart not found in the character.")
-        end
-    else
-        warn("Character not found for player.")
+-- Function to teleport the player up and then back to the original position
+local function teleportUpAndBack()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+    if not humanoidRootPart then
+        warn("HumanoidRootPart not found. Teleportation aborted.")
+        return
     end
-end)
 
--- Implement drag functionality for the button
-local dragging
-local dragInput
-local dragStart
-local startPos
+    local originalCFrame = humanoidRootPart.CFrame
+    -- Teleport up by 50 units
+    humanoidRootPart.CFrame = originalCFrame * CFrame.new(0, 50, 0)
+    wait(0.3)
+    -- Teleport back to the original position
+    humanoidRootPart.CFrame = originalCFrame
+end
 
+-- Create the ScreenGui and add it to the player's PlayerGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TeleportGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Create the teleport button
+local button = Instance.new("TextButton")
+button.Name = "TeleportButton"
+button.Text = "Teleport"
+button.Size = UDim2.new(0, 150, 0, 50)
+button.Position = UDim2.new(0.5, -75, 0.5, -25)
+button.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Parent = screenGui
+
+-- Variables to handle dragging behavior
+local dragging = false
+local dragInput, dragStart, startPos
+
+-- Update the button's position based on input delta
 local function update(input)
     local delta = input.Position - dragStart
-    tpButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-                                  startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                                 startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 
-tpButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or
-       input.UserInputType == Enum.UserInputType.Touch then
+-- Handle the beginning of a drag (both mouse and touch input)
+button.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
-        startPos = tpButton.Position
-        
+        startPos = button.Position
+
+        -- End dragging when the input ends
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
@@ -78,15 +66,21 @@ tpButton.InputBegan:Connect(function(input)
     end
 end)
 
-tpButton.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or
-       input.UserInputType == Enum.UserInputType.Touch then
+-- Track input changes that may be used for dragging (mouse movement or touch)
+button.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         dragInput = input
     end
 end)
 
-RunService:BindToRenderStep("ButtonDrag", Enum.RenderPriority.Input, function()
-    if dragging and dragInput then
-        update(dragInput)
+-- Update the button's position based on global input changes if dragging is active
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        update(input)
     end
+end)
+
+-- Connect the teleport function to the button click event
+button.MouseButton1Click:Connect(function()
+    teleportUpAndBack()
 end)
