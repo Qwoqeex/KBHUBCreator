@@ -1,5 +1,5 @@
 -- Toggleable ESP Script for Roblox (Text Only)
--- Press "B" to toggle the ESP on/off.
+-- Press "X" to toggle the ESP on/off.
 
 -- Global state variables
 local espEnabled = false        -- Indicates if ESP is currently enabled
@@ -21,17 +21,21 @@ local function startESP()
     local NameTag = Instance.new("BillboardGui")
     NameTag.Name = "nilNameTag"
     NameTag.Enabled = false
-    NameTag.Size = UDim2.new(0, 200, 0, 50)
+    -- Reduced size for a more compact display
+    NameTag.Size = UDim2.new(0, 150, 0, 30)
     NameTag.AlwaysOnTop = true
     NameTag.StudsOffset = Vector3.new(0, 1.8, 0)
 
+    -- Configure the TextLabel to be centered over the player's head
     local Tag = Instance.new("TextLabel", NameTag)
     Tag.Name = "Tag"
     Tag.BackgroundTransparency = 1
-    Tag.Position = UDim2.new(0, -50, 0, 0)
-    Tag.Size = UDim2.new(0, 300, 0, 40)
-    Tag.TextSize = 15
-    -- Default text color; will be overwritten with the player's team color when loaded.
+    -- Set the position to the center of the BillboardGui
+    Tag.Position = UDim2.new(0.5, 0, 0.5, 0)
+    -- Set the AnchorPoint to the center so that the text remains exactly centered
+    Tag.AnchorPoint = Vector2.new(0.5, 0.5)
+    Tag.Size = UDim2.new(0, 200, 0, 30)
+    Tag.TextSize = 10
     Tag.TextColor3 = Color3.new(100 / 255, 100 / 255, 100 / 255)
     Tag.TextStrokeColor3 = Color3.new(0, 0, 0)
     Tag.TextStrokeTransparency = 0.4
@@ -173,7 +177,8 @@ end
 local UserInputService = game:GetService("UserInputService")
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.B then
+    -- Changed toggle key from B to X
+    if input.KeyCode == Enum.KeyCode.X then
         if not espEnabled then
             startESP()
             espEnabled = true
