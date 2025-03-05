@@ -1,0 +1,113 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local StarterGui = game:GetService("StarterGui")
+local player = Players.LocalPlayer
+local camera = Workspace.CurrentCamera
+local MAX_DISTANCE = 90
+
+local scriptEnabled = false
+local function sendNotification(title, text, duration)
+	if StarterGui and StarterGui.SetCore then
+		StarterGui:SetCore("SendNotification", {
+			Title = title or "Notification",
+			Text = text or "",
+			Duration = duration or 3
+		})
+	else
+		warn("StarterGui does not support SetCore notifications.")
+	end
+end
+
+local function getOtherPlayersParts()
+	local partsList = {}
+	for _, otherPlayer in ipairs(Players:GetPlayers()) do
+		if otherPlayer ~= player and otherPlayer.Character then
+			for _, descendant in ipairs(otherPlayer.Character:GetDescendants()) do
+				if descendant:IsA("BasePart") then
+					table.insert(partsList, descendant)
+				end
+			end
+		end
+	end
+	return partsList
+end
+
+local function highlightAndTeleportTarget()
+	if not scriptEnabled then
+		return
+	end
+
+	local mouse = player:GetMouse()
+	if not mouse then
+		warn("Could not retrieve the local player's mouse.")
+		return
+	end
+
+	local mousePos = Vector2.new(mouse.X, mouse.Y)
+	local ray = camera:ScreenPointToRay(mousePos.X, mousePos.Y)
+	local origin = ray.Origin
+	local direction = ray.Direction * MAX_DISTANCE
+	local raycastParams = RaycastParams.new()
+	raycastParams.FilterType = Enum.RaycastFilterType.Whitelist
+	raycastParams.FilterDescendantsInstances = getOtherPlayersParts()
+	raycastParams.IgnoreWater = true
+
+	local result = Workspace:Raycast(origin, direction, raycastParams)
+	if not result or not result.Instance then
+		return
+	end
+
+	local targetCharacter = result.Instance:FindFirstAncestorOfClass("Model")
+	if targetCharacter and targetCharacter ~= player.Character then
+		local humanoid = targetCharacter:FindFirstChildWhichIsA("Humanoid")
+		if humanoid then
+			local highlight = Instance.new("Highlight")
+			highlight.Name = "TempHighlight"
+			highlight.Adornee = targetCharacter
+			highlight.FillColor = Color3.new(1, 1, 0)       -- Yellow fill
+			highlight.FillTransparency = 1
+			highlight.OutlineColor = Color3.new(1, 0, 0)      -- Red outline
+			highlight.Parent = targetCharacter
+
+			delay(1, function()
+				if highlight and highlight.Parent then
+					highlight:Destroy()
+				end
+			end)
+
+			local targetHRP = targetCharacter:FindFirstChild("HumanoidRootPart")
+			local localHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+			if targetHRP and localHRP then
+				local offset = Vector3.new(0, 5, 0)
+				local newPosition = targetHRP.Position + offset
+				player.Character:MoveTo(newPosition)
+			else
+				warn("Could not find HumanoidRootPart for teleportation.")
+			end
+		end
+	end
+end
+
+local function onInputBegan(input, gameProcessed)
+	if gameProcessed then
+		return
+	end
+
+	if input.KeyCode == Enum.KeyCode.Z then
+		scriptEnabled = not scriptEnabled
+		if scriptEnabled then
+			sendNotification("Script Enabled", "The script is now active.", 3)
+		else
+			sendNotification("Script Disabled", "The script is now inactive.", 3)
+		end
+		return
+	end
+
+	if input.KeyCode == Enum.KeyCode.T then
+		highlightAndTeleportTarget()
+	end
+end
+
+UserInputService.InputBegan:Connect(onInputBegan)
